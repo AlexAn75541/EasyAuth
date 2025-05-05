@@ -1,20 +1,5 @@
 package xyz.nikitacartes.easyauth;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.player.*;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import xyz.nikitacartes.easyauth.commands.*;
-import xyz.nikitacartes.easyauth.config.*;
-import xyz.nikitacartes.easyauth.event.AuthEventHandler;
-import xyz.nikitacartes.easyauth.storage.database.*;
-import xyz.nikitacartes.easyauth.utils.LuckPermsIntegration;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,8 +12,42 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Identifier;
+import xyz.nikitacartes.easyauth.commands.AccountCommand;
+import xyz.nikitacartes.easyauth.commands.AuthCommand;
+import xyz.nikitacartes.easyauth.commands.LoginCommand;
+import xyz.nikitacartes.easyauth.commands.LogoutCommand;
+import xyz.nikitacartes.easyauth.commands.RegisterCommand;
+import xyz.nikitacartes.easyauth.config.ConfigMigration;
 import static xyz.nikitacartes.easyauth.config.ConfigMigration.migrateFromV1;
-import static xyz.nikitacartes.easyauth.utils.EasyLogger.*;
+import xyz.nikitacartes.easyauth.config.ExtendedConfigV1;
+import xyz.nikitacartes.easyauth.config.LangConfigV1;
+import xyz.nikitacartes.easyauth.config.MainConfigV1;
+import xyz.nikitacartes.easyauth.config.StorageConfigV1;
+import xyz.nikitacartes.easyauth.config.TechnicalConfigV1;
+import xyz.nikitacartes.easyauth.config.VersionConfig;
+import xyz.nikitacartes.easyauth.event.AuthEventHandler;
+import xyz.nikitacartes.easyauth.storage.database.DBApiException;
+import xyz.nikitacartes.easyauth.storage.database.DbApi;
+import xyz.nikitacartes.easyauth.storage.database.MongoDB;
+import xyz.nikitacartes.easyauth.storage.database.MySQL;
+import xyz.nikitacartes.easyauth.storage.database.SQLite;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogError;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogInfo;
+import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogWarn;
+import xyz.nikitacartes.easyauth.utils.LuckPermsIntegration;
 
 public class EasyAuth implements ModInitializer {
     public static DbApi DB = null;
@@ -50,7 +69,7 @@ public class EasyAuth implements ModInitializer {
     @Override
     public void onInitialize() {
         gameDirectory = FabricLoader.getInstance().getGameDir();
-        LogInfo("EasyAuth mod by NikitaCartes");
+        LogInfo("EasyAuth mod by NikitaCartes(Vietnamese translation by Aretzera)");
 
         File file = new File(gameDirectory + "/config/EasyAuth");
         if (!file.exists()) {

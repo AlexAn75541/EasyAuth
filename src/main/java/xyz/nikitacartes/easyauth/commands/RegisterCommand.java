@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -22,6 +23,22 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogRegister;
 
 
 public class RegisterCommand {
+
+    // Suggestion providers for the command arguments
+    private static final SuggestionProvider<ServerCommandSource> GLOBAL_PASSWORD_SUGGESTIONS = (context, builder) -> {
+        builder.suggest("<Hãy đặt mật khẩu toàn cầu>");
+        return builder.buildFuture();
+    };
+
+    private static final SuggestionProvider<ServerCommandSource> PASSWORD_SUGGESTIONS = (context, builder) -> {
+        builder.suggest("<Hãy đặt mật khẩu>");
+        return builder.buildFuture();
+    };
+
+    private static final SuggestionProvider<ServerCommandSource> CONFIRM_PASSWORD_SUGGESTIONS = (context, builder) -> {
+        builder.suggest("<Hãy nhập lại mật khẩu thêm một lần nữa>");
+        return builder.buildFuture();
+    };
 
     // Registering the "/reg" alias
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -39,8 +56,10 @@ public class RegisterCommand {
             return dispatcher.register(literal("register")
                     .requires(Permissions.require("easyauth.commands.register", true))
                     .then(argument("globalPassword", string())
+                            .suggests(GLOBAL_PASSWORD_SUGGESTIONS)
                             .then(argument("password", string())
                                     .then(argument("passwordAgain", string())
+                                            .suggests(PASSWORD_SUGGESTIONS)
                                             .executes(ctx -> register(ctx.getSource(),
                                                     getString(ctx, "globalPassword"),
                                                     getString(ctx, "password"),
@@ -56,7 +75,9 @@ public class RegisterCommand {
             return dispatcher.register(literal("register")
                     .requires(Permissions.require("easyauth.commands.register", true))
                     .then(argument("password", string())
+                            .suggests(PASSWORD_SUGGESTIONS)
                             .then(argument("passwordAgain", string())
+                                    .suggests(CONFIRM_PASSWORD_SUGGESTIONS)
                                     .executes(ctx -> register(ctx.getSource(),
                                             getString(ctx, "password"),
                                             getString(ctx, "passwordAgain")))

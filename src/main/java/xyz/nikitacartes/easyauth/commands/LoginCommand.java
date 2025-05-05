@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static xyz.nikitacartes.easyauth.EasyAuth.*;
@@ -21,6 +22,12 @@ import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogDebug;
 import static xyz.nikitacartes.easyauth.utils.EasyLogger.LogLogin;
 
 public class LoginCommand {
+
+        // Suggestion providers for the command arguments
+    private static final SuggestionProvider<ServerCommandSource> PASSWORD_SUGGESTIONS = (context, builder) -> {
+        builder.suggest("<Hãy nhập mật khẩu>");
+        return builder.buildFuture();
+    };
 
     public static void registerCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         LiteralCommandNode<ServerCommandSource> node = registerLogin(dispatcher); // Registering the "/login" command
@@ -35,6 +42,7 @@ public class LoginCommand {
         return dispatcher.register(literal("login")
                 .requires(Permissions.require("easyauth.commands.login", true))
                 .then(argument("password", string())
+                        .suggests(PASSWORD_SUGGESTIONS)
                         .executes(ctx -> login(ctx.getSource(), getString(ctx, "password")) // Tries to authenticate user
                         ))
                 .executes(ctx -> {
